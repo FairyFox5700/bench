@@ -32,3 +32,6 @@ module "lambda" {
   bucket_trigger_id = module.s3.bench_execution_results_id
 }
 
+module "iam" {
+  source = "./iam"
+}

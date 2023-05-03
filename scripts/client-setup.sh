@@ -4,10 +4,10 @@ cd /home/ubuntu
 sudo apt update
 sudo apt-add-repository universe
 sudo apt update
-sudo apt install python2-minimal
+sudo apt install python2-minimal -y
 python2 -V
 whereis python2
-sudo ln -s /usr/bin/python2 /usr/bin/python
+sudo ln -s /usr/bin/python2 /usr/bin/python 
 #install cqlsh
 sudo snap install cqlsh
 #install java

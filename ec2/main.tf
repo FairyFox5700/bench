@@ -12,7 +12,26 @@ resource "aws_instance" "scylladb" {
       
     }
     tags = {
-        Name = "scylla ${count.index} node"
+        Name = "scylla_node_${count.index}"
+    }
+}
+
+resource "aws_instance" "cassandradb" {
+    ami =  "ami-00aa9d3df94c6c354"
+    instance_type = "m3.large"
+    key_name = "scalla-key"
+    security_groups = [aws_security_group.scylladbSecurityGroup.name]
+    availability_zone = "eu-west-1c"
+    user_data_base64 = base64encode(file("./scripts/cassandra/cassandra-install.sh"))
+    count         = 3
+    root_block_device {
+      delete_on_termination = true
+      volume_size  = 128
+      volume_type  =  "gp2"
+      
+    }
+    tags = {
+        Name = "cassandra_node_${count.index}"
     }
 }
 

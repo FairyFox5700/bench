@@ -1,6 +1,6 @@
 #!/bin/bash
 
-host_addr="63.32.62.107"
+host_addr="34.241.193.204,3.253.3.76,34.241.116.18"
 read_consistency=ONE
 write_consistency=QUORUM
 workload_name=workloada
@@ -8,7 +8,7 @@ thread_count=1
 cluster_size=3
 dir="cluster"
 database="scylla"
-operationcount=400
+operationcount=2000
 recordcount=1000
 resultdir="/home/ubuntu/results"
 
@@ -16,12 +16,10 @@ resultdir="/home/ubuntu/results"
 sudo mkdir results
 sudo chmod a+rwx results
 
-cd /ycsb-0.17.0
+cd ycsb-0.17.0
 
 #phase load
-read_consistency=ALL
-write_consistency=ALL
-
+phase="load"
 filename=database=${database}_threads=${thread_count}_workload=${workload_name}_operations=${operationcount}_records=${recordcount}_phase=${phase}.csv
 sudo ./bin/ycsb $phase cassandra-cql \
 -P workloads/$workload_name \

@@ -12,7 +12,7 @@ PUBLIC_DNS_NAMES=($(aws ec2 describe-instances --filters "Name=tag:Name,Values=*
 # Loop through the instances and configure Scylla
 for ((i=0; i<$CLUSTER_SIZE; i++)); do
   echo "Configuring host on instance $i"
-  ssh -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]}  "sudo sed -i -- '/seeds/s/127.0.0.1/$INSTANCE_PUBLIC_IP_ADDRESSES/g' /etc/scylla/scylla.yaml"
+  
   ssh -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]}  "sudo sed -i 's/^rpc_address:.*$/rpc_address: 0.0.0.0/g' /etc/scylla/scylla.yaml"
   ssh -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]}  "sudo sed -i 's/^broadcast_rpc_address:.*$/broadcast_rpc_address: $INSTANCE_PUBLIC_IP_ADDRESSES/g' /etc/scylla/scylla.yaml"
   ssh -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]}  "sudo sed -i 's/^listen_address:.*$/listen_address: ${INSTANCE_PRIVATE_IP_ADDRESSES_ARRAY[$i]}/g' /etc/scylla/scylla.yaml"
