@@ -23,6 +23,14 @@ module "s3" {
   region      = "eu-west-1"
 }
 
+#lamda handler
+module "lambda" {
+  source = "./lambda"
+  s3_bench_processing_results_id = module.s3.s3_bench_processing_results_id
+  python_code_dep_backet_id= module.s3.python_code_dep_backet_id
+  bench_execution_result_backet_id = module.s3.bench_execution_result_backet_id
+}
+
 /*
 
 module "ec2" {
@@ -31,12 +39,7 @@ module "ec2" {
 
 
 
-#lamda handler
 
-module "lambda" {
-  source = "./lambda"
-  bucket_trigger_id = module.s3.bench_execution_results_id
-}
 
 module "iam" {
   source = "./iam"
