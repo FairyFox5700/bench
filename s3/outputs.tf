@@ -4,7 +4,7 @@ output "bench_execution_result_backet_id" {
 }
 
 output "python_code_dep_backet_id" {
-  value       = aws_s3_bucket.python_code_dep.id
+  value       = aws_s3_bucket.python_code_dep.arn
   description = "The id of python_code_dep backet"
 }
 
