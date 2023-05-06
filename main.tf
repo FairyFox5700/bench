@@ -5,14 +5,18 @@ terraform {
             version = "~> 3.0"
         }
     }
-
+    backend "s3" {
+      bucket         = "terraform-state-dev-bench"
+      key            = "terraform.tfstate"
+      region         = "eu-west-1"
+    }
 }
 
 provider "aws" {
     region = "eu-west-1"
 }
 
-
+/*
 
 module "ec2" {
   source   = "./ec2"
@@ -34,4 +38,4 @@ module "lambda" {
 
 module "iam" {
   source = "./iam"
-}
+}*/
