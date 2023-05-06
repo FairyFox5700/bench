@@ -1,26 +1,26 @@
 terraform {
-    required_providers {
-        aws = {
-            source = "hashicorp/aws"
-            version = "~> 3.0"
-        }
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
     }
-    backend "s3" {
-      bucket         = "terraform-state-dev-bench"
-      key            = "terraform.tfstate"
-      region         = "eu-west-1"
-    }
+  }
+  backend "s3" {
+    bucket = "terraform-state-dev-bench"
+    key    = "terraform.tfstate"
+    region = "eu-west-1"
+  }
 }
 
 provider "aws" {
-    region = "eu-west-1"
+  region = "eu-west-1"
 }
 
 # Create S3 bucket
 module "s3" {
   source      = "./s3"
   environment = var.environment
-  region = "eu-west-1"
+  region      = "eu-west-1"
 }
 
 /*

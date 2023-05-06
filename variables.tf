@@ -2,7 +2,7 @@
 variable "environment" {
   description = "Name of the environment where infrastructure is being built."
   type        = string
-  default = "dev"
+  default     = "dev"
 }
 
 
