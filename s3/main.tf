@@ -37,13 +37,13 @@ resource "aws_s3_bucket_versioning" "python_code_dep_versioning" {
 }
 
 resource "aws_s3_bucket_object" "s3code_object" {
-  bucket = "python-code-dependencies-lambda-bucket"
+  bucket = aws_s3_bucket.python_code_dep.id
   key    = "s3code.zip"
   source = "./python-lamda-s3-dependencies/s3code.zip"
 }
 
 resource "aws_s3_bucket_object" "python_object" {
-  bucket = "python-code-dependencies-lambda-bucket"
+  bucket = aws_s3_bucket.python_code_dep.id
   key    = "python.zip"
   source = "./python-lamda-s3-dependencies/python.zip"
 }
