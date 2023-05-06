@@ -1,0 +1,30 @@
+
+{
+    "fileLocations": [
+        {
+            "URIPrefixes": [
+                
+            ]
+        }
+    ],
+    "globalUploadSettings": {
+        "format": "CSV",
+        "delimiter": ",",
+        "containsHeader": "true"
+    }
+}
+{
+    "fileLocations": [
+        {
+            "URIPrefixes": [
+                "s3://benchmark-full-results/"
+            ]
+        }
+    ],
+    "globalUploadSettings": {
+        "format": "CSV",
+        "delimiter": ",",
+        "textqualifier": "\"",
+        "containsHeader": "true"
+    }
+}

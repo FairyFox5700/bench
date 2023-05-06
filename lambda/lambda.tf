@@ -79,12 +79,3 @@ resource "aws_lambda_permission" "LambdaPermission" {
     principal = "s3.amazonaws.com"
     source_arn = "arn:aws:s3:::bench-execution-results-pipeline"
 }
-
-resource "aws_s3_bucket_notification" "s3_bucket_upload_trigger" {
-  bucket = "bench-execution-results-pipeline"
-
-  lambda_function {
-    lambda_function_arn = aws_lambda_function.python_s3_handler.arn
-    events              = ["s3:ObjectCreated:*"]
-  }
-}
