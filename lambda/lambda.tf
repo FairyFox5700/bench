@@ -1,5 +1,5 @@
 #s3 handler
-resource "aws_iam_role" "lambda_role" {
+/* resource "aws_iam_role" "lambda_role" {
   name = "lambda_role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -19,7 +19,7 @@ resource "aws_iam_policy_attachment" "lambda_s3_access" {
   name = "lambda_s3_access"
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
   roles = [aws_iam_role.lambda_role.name]
-}
+} */
 
 resource "aws_lambda_function" "python_s3_handler" {
     description = "Processing  s3 bucket bechmark csv outputs and combining them to one csv tabular format in another s3 bucket"
@@ -30,7 +30,7 @@ resource "aws_lambda_function" "python_s3_handler" {
     ]
     runtime = "python3.9"
     timeout = 300
-    role = aws_iam_role.lambda_role.arn
+    //role = aws_iam_role.lambda_role.arn
 
     #s3 code source
     s3_bucket = var.python_code_dep_backet_id
