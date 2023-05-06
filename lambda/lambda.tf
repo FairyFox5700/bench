@@ -23,7 +23,7 @@ resource "aws_iam_policy_attachment" "lambda_s3_access" {
 
 resource "aws_lambda_function" "python_s3_handler" {
     description = "Processing  s3 bucket bechmark csv outputs and combining them to one csv tabular format in another s3 bucket"
-    function_name = "s3-python-benhcmark-output-processor"
+    function_name = "s3-python-benhcmark-output-processor-hadler"
     handler = "s3code.main.lambda_handler"
     architectures = [
         "x86_64"
