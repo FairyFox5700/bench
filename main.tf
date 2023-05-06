@@ -16,18 +16,20 @@ provider "aws" {
     region = "eu-west-1"
 }
 
-/*
-
-module "ec2" {
-  source   = "./ec2"
-}
-
 # Create S3 bucket
 module "s3" {
   source      = "./s3"
   environment = var.environment
   region = "eu-west-1"
 }
+
+/*
+
+module "ec2" {
+  source   = "./ec2"
+}
+
+
 
 #lamda handler
 
