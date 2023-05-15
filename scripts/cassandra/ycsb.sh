@@ -1,3 +1,7 @@
+// This is a shell script written in Bash. It sets some variables such as `host_addr`,
+// `read_consistency`, `write_consistency`, `workload_name`, `thread_count`, `cluster_size`,
+// `database`, `operationcount`, `recordcount`, and `resultdir`. It then creates a directory named
+// `results` and changes its permissions to allow read, write, and execute access for all users.
 #!/bin/bash
 host_addr="3.248.204.228,3.253.58.60,52.212.34.114"
 read_consistency=ONE
