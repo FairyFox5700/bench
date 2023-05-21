@@ -2,7 +2,11 @@
 
 name: Benchmark
 env:
-    AWS_REGION: ${{ secrets.AWS_REGION }}    
+    AWS_REGION: ${{ secrets.AWS_REGION }}
+permissions:
+      id-token: write 
+      contents: read 
+      pull-requests: write 
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
