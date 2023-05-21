@@ -21,6 +21,7 @@ jobs:
         run: |
           echo "$SCALLA_PRIVATE_KEY" > scalla_key
           chmod 400 scalla_key
+        working-directory: ./scripts/cassandra
           
       - name: Cassandra Setup
         run: bash cassandra-setup.sh
