@@ -13,11 +13,6 @@ variable "scylla_key_name" {
   default     = "scalla-key"
 }
 
-variable "scylla_security_group" {
-  description = "Security group for the ScyllaDB instances"
-  default     = aws_security_group.scylladbSecurityGroup.name
-}
-
 variable "scylla_availability_zone" {
   description = "Availability zone for the ScyllaDB instances"
   default     = "eu-west-1c"
@@ -56,11 +51,6 @@ variable "cassandra_instance_type" {
 variable "cassandra_key_name" {
   description = "Key name for SSH access to the Cassandra instances"
   default     = "scalla-key"
-}
-
-variable "cassandra_security_group" {
-  description = "Security group for the Cassandra instances"
-  default     = aws_security_group.scylladbSecurityGroup.name
 }
 
 variable "cassandra_availability_zone" {
@@ -107,11 +97,6 @@ variable "client_instance_type" {
 variable "client_key_name" {
   description = "Key name for SSH access to the benchmark client instance"
   default     = "scalla-key"
-}
-
-variable "client_security_group" {
-  description = "Security group for the benchmark client instance"
-  default     = aws_security_group.scylladbSecurityGroup.name
 }
 
 variable "client_availability_zone" {

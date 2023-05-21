@@ -2,7 +2,7 @@ resource "aws_instance" "scylladb" {
   ami           = var.scylla_ami_id
   instance_type = var.scylla_instance_type
   key_name      = var.scylla_key_name
-  security_groups = [var.scylla_security_group]
+  security_groups = [aws_security_group.scylladbSecurityGroup.name]
   availability_zone = var.scylla_availability_zone
   count         = var.scylla_instance_count
 
@@ -24,7 +24,7 @@ resource "aws_instance" "cassandradb" {
   ami                  = var.cassandra_ami_id
   instance_type        = var.cassandra_instance_type
   key_name             = var.cassandra_key_name
-  security_groups      = [var.cassandra_security_group]
+  security_groups      = [aws_security_group.scylladbSecurityGroup.name]
   availability_zone    = var.cassandra_availability_zone
   user_data_base64     = var.cassandra_user_data_base64
   count                = var.cassandra_instance_count
@@ -47,7 +47,7 @@ resource "aws_instance" "benchmark_client" {
   ami                  = var.client_ami_id
   instance_type        = var.client_instance_type
   key_name             = var.client_key_name
-  security_groups      = [var.client_security_group]
+  security_groups      = [aws_security_group.scylladbSecurityGroup.name]
   availability_zone    = var.client_availability_zone
   user_data_base64     = var.client_user_data_base64
 
