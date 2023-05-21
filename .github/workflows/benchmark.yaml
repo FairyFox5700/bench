@@ -105,6 +105,8 @@ jobs:
     
 
   move-to-s3:
+    env:
+      SCALLA_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_SCALLA }}
     runs-on: ubuntu-latest
     steps:
       - name: Git checkout
@@ -124,9 +126,14 @@ jobs:
         working-directory: ./scripts
 
       - name: Transfering results to s3 bucket
-        run: bash copy-to-s3.sh
+        run: | 
+          PUBLIC_DNS_NAMES=($(aws ec2 describe-instances --filters "Name=tag:Name,Values=*client*" --query "Reservations[].Instances[].PublicDnsName" --output text))
+          scp -o StrictHostKeyChecking=no -i scalla-key.pem copy-to-s3.sh ubuntu@${PUBLIC_DNS_NAMES[0]}:~/
+          ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${PUBLIC_DNS_NAMES[0]} << 'EOF'
+          bash -s < ./copy-to-s3.sh
+          EOF
         working-directory: ./scripts
-    needs: ycsb-benchmark
+   
 
   clean-up-scylla:
     runs-on: ubuntu-latest
