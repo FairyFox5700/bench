@@ -102,9 +102,11 @@ jobs:
           EOF
           
         working-directory: ./scripts
+    needs: [cassandra-setup, scylla-setup]
     
 
   move-to-s3:
+    needs: ycsb-benchmark
     env:
       SCALLA_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_SCALLA }}
     runs-on: ubuntu-latest
@@ -124,6 +126,7 @@ jobs:
           echo "$SCALLA_PRIVATE_KEY" > scalla-key.pem
           chmod 400 scalla-key.pem
         working-directory: ./scripts
+        
 
       - name: Transfering results to s3 bucket
         run: | 
@@ -136,6 +139,7 @@ jobs:
    
 
   clean-up-scylla:
+    needs: move-to-s3
     env:
         SCALLA_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_SCALLA }}
     runs-on: ubuntu-latest
@@ -159,7 +163,6 @@ jobs:
       - name: cleaning systems before the next run
         run: bash cleanup.sh
         working-directory: ./scripts/scylla
-    needs: move-to-s3
 
   clean-up-cassandra:
     env:
