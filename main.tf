@@ -30,17 +30,9 @@ module "lambda" {
   python_code_dep_backet_id= module.s3.python_code_dep_backet_id
   bench_execution_result_backet_id = module.s3.bench_execution_result_backet_id
 }
-
-/*
-
 module "ec2" {
   source   = "./ec2"
 }
-
-
-
-
-
 module "iam" {
   source = "./iam"
-}*/
+}

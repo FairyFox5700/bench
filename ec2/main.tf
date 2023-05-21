@@ -1,65 +1,72 @@
 resource "aws_instance" "scylladb" {
-    ami =  "ami-0e8a0f4016294654a"
-    instance_type = "i3.large"
-    key_name = "scalla-key"
-    security_groups = [aws_security_group.scylladbSecurityGroup.name]
-    availability_zone = "eu-west-1c"
-    count         = 3
-    root_block_device {
-      delete_on_termination = true
-      volume_size  = 30
-      volume_type  =  "gp2"
-      
+  ami           = var.scylla_ami_id
+  instance_type = var.scylla_instance_type
+  key_name      = var.scylla_key_name
+  security_groups = [var.scylla_security_group]
+  availability_zone = var.scylla_availability_zone
+  count         = var.scylla_instance_count
+
+  root_block_device {
+    delete_on_termination = true
+    volume_size           = var.scylla_root_volume_size
+    volume_type           = var.scylla_root_volume_type
+  }
+
+  tags = merge(
+    var.scylla_instance_tags,
+    {
+      Name = "scylla_node_${count.index}"
     }
-    tags = {
-        Name = "scylla_node_${count.index}"
-    }
+  )
 }
 
 resource "aws_instance" "cassandradb" {
-    ami =  "ami-00aa9d3df94c6c354"
-    instance_type = "m3.large"
-    key_name = "scalla-key"
-    security_groups = [aws_security_group.scylladbSecurityGroup.name]
-    availability_zone = "eu-west-1c"
-    user_data_base64 = base64encode(file("./scripts/cassandra/cassandra-install.sh"))
-    count         = 3
-    root_block_device {
-      delete_on_termination = true
-      volume_size  = 128
-      volume_type  =  "gp2"
-      
+  ami                  = var.cassandra_ami_id
+  instance_type        = var.cassandra_instance_type
+  key_name             = var.cassandra_key_name
+  security_groups      = [var.cassandra_security_group]
+  availability_zone    = var.cassandra_availability_zone
+  user_data_base64     = var.cassandra_user_data_base64
+  count                = var.cassandra_instance_count
+
+  root_block_device {
+    delete_on_termination = true
+    volume_size           = var.cassandra_root_volume_size
+    volume_type           = var.cassandra_root_volume_type
+  }
+
+  tags = merge(
+    var.cassandra_instance_tags,
+    {
+      Name = "cassandra_node_${count.index}"
     }
-    tags = {
-        Name = "cassandra_node_${count.index}"
-    }
+  )
 }
 
 resource "aws_instance" "benchmark_client" {
-    ami =  "ami-00aa9d3df94c6c354"
-    instance_type = "t2.small"
-    key_name = "scalla-key"
-    security_groups = [aws_security_group.scylladbSecurityGroup.name]
-    availability_zone = "eu-west-1c"
-    user_data_base64 = base64encode(file("./scripts/client-setup.sh"))
-    root_block_device {
-      delete_on_termination = true
-      volume_size  = 16
-      volume_type  =  "gp2"
-      
-    }
-    tags = {
-        Name = "benchmark client"
-    }
+  ami                  = var.client_ami_id
+  instance_type        = var.client_instance_type
+  key_name             = var.client_key_name
+  security_groups      = [var.client_security_group]
+  availability_zone    = var.client_availability_zone
+  user_data_base64     = var.client_user_data_base64
+
+  root_block_device {
+    delete_on_termination = true
+    volume_size           = var.client_root_volume_size
+    volume_type           = var.client_root_volume_type
+  }
+
+  tags = var.client_instance_tags
 }
 
 
 resource "aws_cloudwatch_log_group" "example" {
-  name = "example-logs"
+  name = var.log_group_name
 }
 
 resource "aws_cloudwatch_log_stream" "example" {
-  name           = "example-stream"
+  name           = var.log_stream_name
   log_group_name = aws_cloudwatch_log_group.example.name
 }
 
