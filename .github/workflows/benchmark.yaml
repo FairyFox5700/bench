@@ -47,6 +47,8 @@ jobs:
         working-directory: ./scripts/cassandra
 
   scylla-setup:
+    env:
+      SCALLA_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_SCALLA }}
     runs-on: ubuntu-latest
     steps:
       - name: Git checkout
