@@ -25,6 +25,8 @@ for ((i=0; i<$CLUSTER_SIZE; i++)); do
   ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]}  "sudo systemctl status scylla-server;"
 done
 
+sleep 120
+
 CQL="DROP KEYSPACE IF EXISTS ycsb; CREATE KEYSPACE IF NOT EXISTS ycsb WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': '${CLUSTER_SIZE}'} AND DURABLE_WRITES = true; USE ycsb; DROP TABLE IF EXISTS usertable; CREATE TABLE usertable (
     y_id varchar primary key,
     field0 varchar,
