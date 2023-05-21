@@ -1,26 +1,47 @@
 # This is a basic workflow to help you get started with Actions
 
 name: Benchmark
-
+env:
+    AWS_REGION: ${{ secrets.AWS_REGION }}
+permissions:
+      id-token: write 
+      contents: read 
+      pull-requests: write 
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
+  workflow_run:
+    workflows: ["Terraform action"]
+    types:
+      - completed
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-          
+    
 jobs:
   cassandra-setup:
     runs-on: ubuntu-latest
     env:
       SCALLA_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_SCALLA }}
+      
     steps:
-      - uses: actions/checkout@v3
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials from AWS account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: GitHub-OIDC-TERRAFORM
+
       - name: Use scalla_key
         run: |
-          echo "$SCALLA_PRIVATE_KEY" > scalla_key
-          chmod 400 scalla_key
+          echo "$SCALLA_PRIVATE_KEY" > scalla-key.pem
+          chmod 400 scalla-key.pem
+          aws ec2 describe-instances --filters "Name=tag:Name,Values=*cassandra*" --query "Reservations[].Instances[].PublicIpAddress" --output text | sed 's/\t/,/g'
+        working-directory: ./scripts/cassandra
           
       - name: Cassandra Setup
         run: bash cassandra-setup.sh
