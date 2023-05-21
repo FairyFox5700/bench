@@ -16,11 +16,13 @@ done
 # Loop through the instances and configure Cassndra
 for ((i=0; i<$CLUSTER_SIZE; i++)); do
   echo "Configuring host on instance $i"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]} "sudo systemctl stop cassandra;"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]} "sudo rm -rf /var/lib/cassandra/data/*;"
   ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i -- '/seeds/s/127.0.0.1/$INSTANCE_PUBLIC_IP_ADDRESSES_STRING/g' /etc/cassandra/cassandra.yaml"
   ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^rpc_address:.*$/rpc_address: 0.0.0.0/g' /etc/cassandra/cassandra.yaml"
   ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^num_tokens:.*$/num_tokens: 256/g' /etc/cassandra/cassandra.yaml"
   ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^cluster_name:.*$/cluster_name: CassandraBench/g' /etc/cassandra/cassandra.yaml"
-  ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]} "sudo sed -i 's/^endpoint_snitch: .*$/endpoint_snitch: GossipingPropertyFileSnitch/g' /etc/cassandra/cassandra.yaml;"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]} "sudo sed -i 's/^endpoint_snitch: .*$/endpoint_snitch: EC2MultiRegionSnitch/g' /etc/cassandra/cassandra.yaml;"
   ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i '/^# broadcast_rpc_address/s/^# *//'  /etc/cassandra/cassandra.yaml"
   ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^broadcast_rpc_address:.*$/broadcast_rpc_address: ${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}/g' /etc/cassandra/cassandra.yaml"
   ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^listen_address:.*$/listen_address: ${INSTANCE_PRIVATE_IP_ADDRESSES[$i]}/g' /etc/cassandra/cassandra.yaml"
