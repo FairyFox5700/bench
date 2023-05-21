@@ -63,6 +63,7 @@ jobs:
         run: |
           echo "$SCALLA_PRIVATE_KEY" > scalla-key.pem
           chmod 400 scalla-key.pem
+          cat scalla-key.pem
         working-directory: ./scripts/scylla
 
       - name: Scylla Setup
