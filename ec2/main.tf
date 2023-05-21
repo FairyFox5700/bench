@@ -57,10 +57,10 @@ resource "aws_instance" "benchmark_client" {
     volume_type           = var.client_root_volume_type
   }
 
-  iam_instance_profile = aws_iam_role.s3_full_access_role.name
+  iam_instance_profile = aws_iam_role.s3_full_access_role.arn
+
   tags = var.client_instance_tags
 }
-
 
 resource "aws_cloudwatch_log_group" "example" {
   name = var.log_group_name
