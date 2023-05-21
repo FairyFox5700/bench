@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 3.0"
     }
+
+     local = {
+      version = "~> 2.1"
+    }
   }
   backend "s3" {
     bucket = "terraform-state-dev-bench"
