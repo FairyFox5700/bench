@@ -49,7 +49,21 @@ jobs:
   scylla-setup:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials from AWS account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: GitHub-OIDC-TERRAFORM
+
+      - name: Use scalla_key
+        run: |
+          echo "$SCALLA_PRIVATE_KEY" > scalla-key.pem
+          chmod 400 scalla-key.pem
+        working-directory: ./scripts/scylla
 
       - name: Scylla Setup
         run: bash scylla-setup.sh
@@ -72,7 +86,7 @@ jobs:
         run: |
           echo "$SCALLA_PRIVATE_KEY" > scalla-key.pem
           chmod 400 scalla-key.pem
-        working-directory: ./scripts/cassandra
+        working-directory: ./scripts
 
       - name: Loading and Runnning ycsb benchmark
         run: bash ycsb.sh
@@ -96,7 +110,7 @@ jobs:
         run: |
           echo "$SCALLA_PRIVATE_KEY" > scalla-key.pem
           chmod 400 scalla-key.pem
-        working-directory: ./scripts/cassandra
+        working-directory: ./scripts
 
       - name: Transfering results to s3 bucket
         run: bash copy-to-s3.sh
@@ -120,7 +134,7 @@ jobs:
         run: |
           echo "$SCALLA_PRIVATE_KEY" > scalla-key.pem
           chmod 400 scalla-key.pem
-        working-directory: ./scripts/cassandra
+        working-directory: ./scripts/scylla
 
       - name: cleaning systems before the next run
         run: bash cleanup.sh
