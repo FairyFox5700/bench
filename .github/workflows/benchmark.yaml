@@ -136,6 +136,8 @@ jobs:
    
 
   clean-up-scylla:
+    env:
+        SCALLA_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_SCALLA }}
     runs-on: ubuntu-latest
     steps:
       - name: Git checkout
@@ -160,6 +162,8 @@ jobs:
     needs: move-to-s3
 
   clean-up-cassandra:
+    env:
+      SCALLA_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_SCALLA }}
     runs-on: ubuntu-latest
     steps:
       - name: Git checkout
