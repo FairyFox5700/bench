@@ -20,7 +20,7 @@ jobs:
       - name: Use scalla_key
         run: |
           echo "$SCALLA_PRIVATE_KEY" > scalla_key.pem
-          chmod 400 scalla_key
+          chmod 400 scalla_key.pem
         working-directory: ./scripts/cassandra
           
       - name: Cassandra Setup
