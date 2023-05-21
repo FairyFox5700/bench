@@ -1,20 +1,14 @@
 #!/bin/bash
 
-CLUSTER_SIZE=3
-CLUSTER_NAME="client"
-
-PUBLIC_DNS_NAMES=($(aws ec2 describe-instances --filters "Name=tag:Name,Values=*$CLUSTER_NAME*" --query "Reservations[].Instances[].PublicDnsName" --output text))
-
-
 # default parameter values
-host_addr="34.241.193.204,3.253.3.76,34.241.116.18"
+host_addr="34.242.206.20,34.248.123.137,52.48.128.110"
 read_consistency="ONE"
 write_consistency="QUORUM"
 workload_name="workloada"
-thread_count=1
+THREADS="1 2"
 cluster_size=3
 database="scylla"
-operationcount=2000
+OPERATIONS_COUNT="2000 4000"
 recordcount=1000
 resultdir="/home/ubuntu/results"
 
@@ -25,10 +19,10 @@ while getopts ":a:r:w:n:t:s:d:o:c:u:" opt; do
     r) read_consistency=$OPTARG;;
     w) write_consistency=$OPTARG;;
     n) workload_name=$OPTARG;;
-    t) thread_count=$OPTARG;;
+    t) THREADS=$OPTARG;;
     s) cluster_size=$OPTARG;;
     d) database=$OPTARG;;
-    o) operationcount=$OPTARG;;
+    o) OPERATIONS_COUNT=$OPTARG;;
     c) recordcount=$OPTARG;;
     u) resultdir=$OPTARG;;
     \?) echo "Invalid option: -$OPTARG" >&2;;
@@ -41,10 +35,10 @@ echo "host_addr: $host_addr"
 echo "read_consistency: $read_consistency"
 echo "write_consistency: $write_consistency"
 echo "workload_name: $workload_name"
-echo "thread_count: $thread_count"
+echo "thread_count: $THREADS"
 echo "cluster_size: $cluster_size"
 echo "database: $database"
-echo "operationcount: $operationcount"
+echo "operationcount: $OPERATIONS_COUNT"
 echo "recordcount: $recordcount"
 echo "resultdir: $resultdir"
 
@@ -61,27 +55,27 @@ do
 	date
 
 	#phase load
-    echo "Running ycsb load for $database with Operation Count: $operationcount and Thread Count as $hread_count"
-	ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo ./bin/ycsb load cassandra-cql \
+    echo "Running ycsb load for $database with Operation Count: $operationcount and Thread Count as $thread_count"
+	sudo ./bin/ycsb load cassandra-cql \
 	-P workloads/$workload_name \
 	-threads $thread_count \
 	-p recordcount=$recordcount \
 	-p operationcount=$operationcount \
 	-p cassandra.readconsistencylevel=$read_consistency \
 	-p cassandra.writeconsistencylevel=$write_consistency \
-	-p hosts=$host_addr -s > $resultdir/database=${database}_threads=${thread_count}_workload=${workload_name}_operations=${operationcount}_records=${recordcount}_phase=load.csv"
+	-p hosts=$host_addr -s > $resultdir/database=${database}_threads=${thread_count}_workload=${workload_name}_operations=${operationcount}_records=${recordcount}_phase=load.csv
     echo "Finished execution of ycsb load for $database with Operation Count: $operationcount and Thread Count as $hread_count"
 	
     #phase run
-    echo "Running ycsb run for $database with Operation Count: $operationcount and Thread Count as $hread_count"
-	ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo ./bin/ycsb run cassandra-cql \
+    echo "Running ycsb run for $database with Operation Count: $operationcount and Thread Count as $thread_count"
+	sudo ./bin/ycsb run cassandra-cql \
 	-P workloads/$workload_name \
 	-threads $thread_count \
 	-p recordcount=$recordcount \
 	-p operationcount=$operationcount \
 	-p cassandra.readconsistencylevel=$read_consistency \
 	-p cassandra.writeconsistencylevel=$write_consistency \
-	-p hosts=$host_addr -s > $resultdir/database=${database}_threads=${thread_count}_workload=${workload_name}_operations=${operationcount}_records=${recordcount}_phase=run.csv"
+	-p hosts=$host_addr -s > $resultdir/database=${database}_threads=${thread_count}_workload=${workload_name}_operations=${operationcount}_records=${recordcount}_phase=run.csv
 
     echo "Finished execution of ycsb run for $database with Operation Count: $operationcount and Thread Count as $hread_count"
 	
