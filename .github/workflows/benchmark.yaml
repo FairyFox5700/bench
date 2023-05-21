@@ -9,6 +9,10 @@ on:
     workflows: ["Terraform action"]
     types:
       - completed
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
           
 jobs:
   cassandra-setup:
