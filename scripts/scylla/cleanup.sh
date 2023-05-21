@@ -7,22 +7,22 @@ PUBLIC_DNS_NAMES=($(aws ec2 describe-instances --filters "Name=tag:Name,Values=*
 for ((i=0; i<CLUSTER_SIZE; i++)); do 
 
 echo "Running nodetool cleanup on instance $i";
-ssh -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]} 'nodetool cleanup';
+ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]} 'nodetool cleanup';
 echo "Running nodetool clearsnapshot on instance $i";
-ssh -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]} 'nodetool clearsnapshot --all';
-ssh -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]} "sudo systemctl stop scylla-server;"
-ssh -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]} "sudo rm -rf /var/lib/scylla/data/*;"
+ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]} 'nodetool clearsnapshot --all';
+ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]} "sudo systemctl stop scylla-server;"
+ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]} "sudo rm -rf /var/lib/scylla/data/*;"
 done
 
 for ((i=0; i<$CLUSTER_SIZE; i++)); do
   echo "Restarting scylla on instance $i"
-  ssh -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]}  "sudo systemctl start scylla-server;"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]}  "sudo systemctl start scylla-server;"
 done
 
 sleep 120
 for ((i=0; i<$CLUSTER_SIZE; i++)); do
   echo "Configuring host on instance $i"
-  ssh -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]}  "sudo systemctl status scylla-server;"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]}  "sudo systemctl status scylla-server;"
 done
 
 CQL="DROP KEYSPACE IF EXISTS ycsb; CREATE KEYSPACE IF NOT EXISTS ycsb WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': '${CLUSTER_SIZE}'} AND DURABLE_WRITES = true; USE ycsb; DROP TABLE IF EXISTS usertable; CREATE TABLE usertable (
@@ -40,5 +40,5 @@ CQL="DROP KEYSPACE IF EXISTS ycsb; CREATE KEYSPACE IF NOT EXISTS ycsb WITH REPLI
 
 for ((i=0; i<CLUSTER_SIZE; i++)); do 
 echo "Dropping and re-creating keyspace and table for YCSB Timeseries Workload..."
-ssh -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]} "cqlsh -e \"$CQL\" "
+ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]} "cqlsh -e \"$CQL\" "
 done

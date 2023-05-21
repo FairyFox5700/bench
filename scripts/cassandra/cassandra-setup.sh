@@ -10,31 +10,31 @@ INSTANCE_PUBLIC_IP_ADDRESSES=($(aws ec2 describe-instances --filters "Name=tag:N
 sleep 10
 for ((i=0; i<$CLUSTER_SIZE; i++)); do
   echo "Restarting cassandra on instance $i"
-  ssh -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo service cassandra stop;"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo service cassandra stop;"
 done
 
 # Loop through the instances and configure Cassndra
 for ((i=0; i<$CLUSTER_SIZE; i++)); do
   echo "Configuring host on instance $i"
-  ssh -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i -- '/seeds/s/127.0.0.1/$INSTANCE_PUBLIC_IP_ADDRESSES_STRING/g' /etc/cassandra/cassandra.yaml"
-  ssh -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^rpc_address:.*$/rpc_address: 0.0.0.0/g' /etc/cassandra/cassandra.yaml"
-  ssh -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^num_tokens:.*$/num_tokens: 256/g' /etc/cassandra/cassandra.yaml"
-  ssh -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^cluster_name:.*$/cluster_name: CassandraBench/g' /etc/cassandra/cassandra.yaml"
-  ssh -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]} "sudo sed -i 's/^endpoint_snitch: .*$/endpoint_snitch: Ec2MultiRegionSnitch/g' /etc/cassandra/cassandra.yaml;"
-  ssh -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i '/^# broadcast_rpc_address/s/^# *//'  /etc/cassandra/cassandra.yaml"
-  ssh -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^broadcast_rpc_address:.*$/broadcast_rpc_address: ${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}/g' /etc/cassandra/cassandra.yaml"
-  ssh -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^listen_address:.*$/listen_address: ${INSTANCE_PRIVATE_IP_ADDRESSES[$i]}/g' /etc/cassandra/cassandra.yaml"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i -- '/seeds/s/127.0.0.1/$INSTANCE_PUBLIC_IP_ADDRESSES_STRING/g' /etc/cassandra/cassandra.yaml"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^rpc_address:.*$/rpc_address: 0.0.0.0/g' /etc/cassandra/cassandra.yaml"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^num_tokens:.*$/num_tokens: 256/g' /etc/cassandra/cassandra.yaml"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^cluster_name:.*$/cluster_name: CassandraBench/g' /etc/cassandra/cassandra.yaml"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]} "sudo sed -i 's/^endpoint_snitch: .*$/endpoint_snitch: Ec2MultiRegionSnitch/g' /etc/cassandra/cassandra.yaml;"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i '/^# broadcast_rpc_address/s/^# *//'  /etc/cassandra/cassandra.yaml"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^broadcast_rpc_address:.*$/broadcast_rpc_address: ${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}/g' /etc/cassandra/cassandra.yaml"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^listen_address:.*$/listen_address: ${INSTANCE_PRIVATE_IP_ADDRESSES[$i]}/g' /etc/cassandra/cassandra.yaml"
 done
 
 for ((i=0; i<$CLUSTER_SIZE; i++)); do
   echo "Restarting cassandra on instance $i"
-  ssh -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo systemctl start cassandra;"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo systemctl start cassandra;"
 done
 
 sleep 60
 for ((i=0; i<$CLUSTER_SIZE; i++)); do
   echo "Configuring host on instance $i"
-  ssh -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo systemctl status cassandra;"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo systemctl status cassandra;"
 done
 
 for ((i=0; i<$CLUSTER_SIZE; i++)); do
@@ -52,9 +52,9 @@ CQL="DROP KEYSPACE IF EXISTS ycsb; CREATE KEYSPACE IF NOT EXISTS ycsb WITH REPLI
     field8 varchar,
     field9 varchar);"
 echo "Creating keyspace and table for YCSB Timeseries Workload..."
-ssh -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]} "cqlsh -e \"$CQL\" "
+ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]} "cqlsh -e \"$CQL\" "
 
 # Check the status of the YCSB keyspace on the first instance
-ssh -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]} "nodetool status ycsb"
+ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]} "nodetool status ycsb"
 done
 echo "<<Script finished in $SECONDS seconds>>"

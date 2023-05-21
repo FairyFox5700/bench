@@ -12,33 +12,33 @@ INSTANCE_PUBLIC_IP_ADDRESSES=($(aws ec2 describe-instances --filters "Name=tag:N
 
 for ((i=0; i<$CLUSTER_SIZE; i++)); do
   echo "Restarting cassandra on instance $i"
-  ssh -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo systemctl stop scylla-server;"
-  ssh -i scalla-key.pem ubuntu@${PUBLIC_DNS_NAMES[$i]} "sudo rm -rf /var/lib/scylla/data/*;"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo systemctl stop scylla-server;"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${PUBLIC_DNS_NAMES[$i]} "sudo rm -rf /var/lib/scylla/data/*;"
 done
 
  
 
 for ((i=0; i<$CLUSTER_SIZE; i++)); do
   echo "Configuring host on instance $i"
-  ssh -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^.*seeds:.*/  - seeds: $INSTANCE_PUBLIC_IP_ADDRESSES_STRING/g' /etc/scylla/scylla.yaml"
-  ssh -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^rpc_address:.*$/rpc_address: 0.0.0.0/g' /etc/scylla/scylla.yaml"
-  ssh -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]} "sudo sed -i 's/^endpoint_snitch: .*$/endpoint_snitch: Ec2MultiRegionSnitch/g' /etc/scylla/scylla.yaml;"
-  ssh -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i '/^# broadcast_rpc_address/s/^# *//'  /etc/scylla/scylla.yaml"
-  ssh -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^broadcast_rpc_address:.*$/broadcast_rpc_address: ${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}/g' /etc/scylla/scylla.yaml"
-  ssh -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^listen_address:.*$/listen_address: ${INSTANCE_PRIVATE_IP_ADDRESSES[$i]}/g' /etc/scylla/scylla.yaml"
-  ssh -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^cluster_name:.*$/cluster_name: ScyllaBench/g' /etc/scylla/scylla.yaml"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^.*seeds:.*/  - seeds: $INSTANCE_PUBLIC_IP_ADDRESSES_STRING/g' /etc/scylla/scylla.yaml"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^rpc_address:.*$/rpc_address: 0.0.0.0/g' /etc/scylla/scylla.yaml"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]} "sudo sed -i 's/^endpoint_snitch: .*$/endpoint_snitch: Ec2MultiRegionSnitch/g' /etc/scylla/scylla.yaml;"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i '/^# broadcast_rpc_address/s/^# *//'  /etc/scylla/scylla.yaml"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^broadcast_rpc_address:.*$/broadcast_rpc_address: ${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}/g' /etc/scylla/scylla.yaml"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^listen_address:.*$/listen_address: ${INSTANCE_PRIVATE_IP_ADDRESSES[$i]}/g' /etc/scylla/scylla.yaml"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo sed -i 's/^cluster_name:.*$/cluster_name: ScyllaBench/g' /etc/scylla/scylla.yaml"
 done
 
 
 for ((i=0; i<$CLUSTER_SIZE; i++)); do
   echo "Configuring host on instance $i"
-  ssh -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo systemctl restart scylla-server;"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo systemctl restart scylla-server;"
 done
 
 sleep 120
 for ((i=0; i<$CLUSTER_SIZE; i++)); do
   echo "Configuring host on instance $i"
-  ssh -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo systemctl status scylla-server;"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo systemctl status scylla-server;"
 done
 
 for ((i=0; i<$CLUSTER_SIZE; i++)); do
@@ -56,9 +56,9 @@ CQL="DROP KEYSPACE IF EXISTS ycsb; CREATE KEYSPACE IF NOT EXISTS ycsb WITH REPLI
     field8 varchar,
     field9 varchar);"
 echo "Creating keyspace and table for YCSB Timeseries Workload..."
-ssh -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]} "cqlsh -e \"$CQL\" "
+ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]} "cqlsh -e \"$CQL\" "
 
 # Check the status of the YCSB keyspace on the first instance
-ssh -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]} "nodetool status ycsb"
+ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]} "nodetool status ycsb"
 done
 echo "<<Script finished in $SECONDS seconds>>"
