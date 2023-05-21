@@ -13,7 +13,7 @@ INSTANCE_PUBLIC_IP_ADDRESSES=($(aws ec2 describe-instances --filters "Name=tag:N
 for ((i=0; i<$CLUSTER_SIZE; i++)); do
   echo "Restarting cassandra on instance $i"
   ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]}  "sudo systemctl stop scylla-server;"
-  ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]} "sudo rm -rf /var/lib/scylla/data/*;"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${INSTANCE_PUBLIC_IP_ADDRESSES[$i]} "sudo rm -rf /var/lib/scylla/data/*;"
 done
 
  
