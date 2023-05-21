@@ -1,7 +1,8 @@
 # This is a basic workflow to help you get started with Actions
 
 name: Benchmark
-
+env:
+    AWS_REGION: ${{ secrets.AWS_REGION }}    
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
@@ -13,14 +14,24 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-          
+    
 jobs:
   cassandra-setup:
     runs-on: ubuntu-latest
     env:
       SCALLA_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_SCALLA }}
+      
     steps:
-      - uses: actions/checkout@v3
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials from AWS account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: GitHub-OIDC-TERRAFORM
+
       - name: Use scalla_key
         run: |
           echo "$SCALLA_PRIVATE_KEY" > scalla-key.pem
