@@ -92,7 +92,7 @@ jobs:
           chmod 400 scalla-key.pem
         working-directory: ./scripts
         
-      - name: Transfer Script to Remote SSH Instance
+      - name: Loading and Runnning ycsb benchmark
         run: |
           PUBLIC_DNS_NAMES=($(aws ec2 describe-instances --filters "Name=tag:Name,Values=*client*" --query "Reservations[].Instances[].PublicDnsName" --output text))
           scp -o StrictHostKeyChecking=no -i scalla-key.pem ycsb.sh ubuntu@${PUBLIC_DNS_NAMES[0]}:~/
@@ -100,12 +100,9 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${PUBLIC_DNS_NAMES[0]} << 'EOF'
           bash -s < ./ycsb.sh -a "$INSTANCE_PUBLIC_IP_ADDRESSES_STRING_SCYLLA" -c "4000"
           EOF
-
-      - name: Loading and Runnning ycsb benchmark
-        run: |
-
+          
         working-directory: ./scripts
-    needs: [cassandra-setup, scylla-setup ]
+    
 
   move-to-s3:
     runs-on: ubuntu-latest
