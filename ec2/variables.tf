@@ -58,11 +58,6 @@ variable "cassandra_availability_zone" {
   default     = "eu-west-1c"
 }
 
-variable "cassandra_user_data_base64" {
-  description = "Base64-encoded user data for the Cassandra instances"
-  default     = base64encode(file("./scripts/cassandra/cassandra-install.sh"))
-}
-
 variable "cassandra_instance_count" {
   description = "Number of Cassandra instances to create"
   default     = 3
@@ -102,11 +97,6 @@ variable "client_key_name" {
 variable "client_availability_zone" {
   description = "Availability zone for the benchmark client instance"
   default     = "eu-west-1c"
-}
-
-variable "client_user_data_base64" {
-  description = "Base64-encoded user data for the benchmark client instance"
-  default     = base64encode(file("./scripts/client-setup.sh"))
 }
 
 variable "client_root_volume_size" {

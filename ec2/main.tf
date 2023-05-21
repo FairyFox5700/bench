@@ -26,7 +26,7 @@ resource "aws_instance" "cassandradb" {
   key_name             = var.cassandra_key_name
   security_groups      = [aws_security_group.scylladbSecurityGroup.name]
   availability_zone    = var.cassandra_availability_zone
-  user_data_base64     = var.cassandra_user_data_base64
+  user_data_base64     = base64encode(file("./scripts/cassandra/cassandra-install.sh"))
   count                = var.cassandra_instance_count
 
   root_block_device {
@@ -49,7 +49,7 @@ resource "aws_instance" "benchmark_client" {
   key_name             = var.client_key_name
   security_groups      = [aws_security_group.scylladbSecurityGroup.name]
   availability_zone    = var.client_availability_zone
-  user_data_base64     = var.client_user_data_base64
+  user_data_base64     = base64encode(file("./scripts/client-setup.sh"))
 
   root_block_device {
     delete_on_termination = true
