@@ -5,7 +5,7 @@ terraform {
       version = "~> 3.0"
     }
 
-     local = {
+    local = {
       version = "~> 2.1"
     }
   }
@@ -29,13 +29,13 @@ module "s3" {
 
 #lamda handler
 module "lambda" {
-  source = "./lambda"
-  s3_bench_processing_results_id = module.s3.s3_bench_processing_results_id
-  python_code_dep_backet_id= module.s3.python_code_dep_backet_id
+  source                           = "./lambda"
+  s3_bench_processing_results_id   = module.s3.s3_bench_processing_results_id
+  python_code_dep_backet_id        = module.s3.python_code_dep_backet_id
   bench_execution_result_backet_id = module.s3.bench_execution_result_backet_id
 }
 module "ec2" {
-  source   = "./ec2"
+  source = "./ec2"
 }
 module "iam" {
   source = "./iam"
