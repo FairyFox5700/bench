@@ -25,7 +25,7 @@ jobs:
         run: |
           echo "$SCALLA_PRIVATE_KEY" > scalla-key.pem
           chmod 400 scalla-key.pem
-          cat scalla-key.pem
+          aws ec2 describe-instances --filters "Name=tag:Name,Values=*cassandra*" --query "Reservations[].Instances[].PublicIpAddress" --output text | sed 's/\t/,/g'
         working-directory: ./scripts/cassandra
           
       - name: Cassandra Setup
