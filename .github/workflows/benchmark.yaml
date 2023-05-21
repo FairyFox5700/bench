@@ -1,0 +1,73 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Benchmark
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  cassandra-setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cassandra Setup
+        run: bash cassandra-setup.sh
+        working-directory: ./scripts/cassandra
+
+  scylla-setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Scylla Setup
+        run: bash scylla-setup.sh
+        working-directory: ./scripts/scylla
+
+  ycsb-benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Loading and Runnning ycsb benchmark
+        run: bash ycsb.sh
+        working-directory: ./scripts
+    needs: [cassandra-setup, scylla-setup ]
+
+  move-to-s3:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Transfering results to s3 bucket
+        run: bash copy-to-s3.sh
+        working-directory: ./scripts
+    needs: ycsb-benchmark
+
+  clean-up-scylla:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: cleaning systems before the next run
+        run: bash cleanup.sh
+        working-directory: ./scripts/scylla
+    needs: move-to-s3
+
+  clean-up-cassandra:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: cleaning systems before the next run
+        run: bash cleanup.sh
+        working-directory: ./scripts/cassandra
+    needs: move-to-s3
