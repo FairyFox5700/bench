@@ -1,20 +1,47 @@
-// This is a shell script written in Bash. It sets some variables such as `host_addr`,
-// `read_consistency`, `write_consistency`, `workload_name`, `thread_count`, `cluster_size`,
-// `database`, `operationcount`, `recordcount`, and `resultdir`. It then creates a directory named
-// `results` and changes its permissions to allow read, write, and execute access for all users.
 #!/bin/bash
-host_addr="3.248.204.228,3.253.58.60,52.212.34.114"
-read_consistency=ONE
-write_consistency=QUORUM
-workload_name=workloade
+
+# default parameter values
+host_addr="34.241.193.204,3.253.3.76,34.241.116.18"
+read_consistency="ONE"
+write_consistency="QUORUM"
+workload_name="workloada"
 thread_count=1
 cluster_size=3
-database="cassandra"
-operationcount=4000
-recordcount=2000
+database="scylla"
+operationcount=2000
+recordcount=1000
 resultdir="/home/ubuntu/results"
-THREADS="1 2 4 8 16 32 64 128"
-OPERATIONS_COUNT="1000 2000 3000 4000 5000 6000"
+
+# parse command-line arguments
+while getopts ":a:r:w:n:t:s:d:o:c:u:" opt; do
+  case $opt in
+    a) host_addr=$OPTARG;;
+    r) read_consistency=$OPTARG;;
+    w) write_consistency=$OPTARG;;
+    n) workload_name=$OPTARG;;
+    t) thread_count=$OPTARG;;
+    s) cluster_size=$OPTARG;;
+    d) database=$OPTARG;;
+    o) operationcount=$OPTARG;;
+    c) recordcount=$OPTARG;;
+    u) resultdir=$OPTARG;;
+    \?) echo "Invalid option: -$OPTARG" >&2;;
+  esac
+done
+
+# Print the arguments passed
+echo "Arguments passed:"
+echo "host_addr: $host_addr"
+echo "read_consistency: $read_consistency"
+echo "write_consistency: $write_consistency"
+echo "workload_name: $workload_name"
+echo "thread_count: $thread_count"
+echo "cluster_size: $cluster_size"
+echo "database: $database"
+echo "operationcount: $operationcount"
+echo "recordcount: $recordcount"
+echo "resultdir: $resultdir"
+
 #mkdir for results
 sudo mkdir results
 sudo chmod a+rwx results
