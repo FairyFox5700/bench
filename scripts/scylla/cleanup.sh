@@ -19,13 +19,15 @@ for ((i=0; i<$CLUSTER_SIZE; i++)); do
   ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]}  "sudo systemctl start scylla-server;"
 done
 
-sleep 120
 for ((i=0; i<$CLUSTER_SIZE; i++)); do
   echo "Configuring host on instance $i"
-  ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]}  "sudo systemctl status scylla-server;"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]} "sudo systemctl is-active --quiet scylla-server && echo 'Scylla is running' || echo 'Scylla is not running'"
+  while [[ $(ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]} "sudo systemctl is-active --quiet scylla-server || echo 'inactive'") == "inactive" ]]; do
+    echo "Waiting for Scylla to start..."
+    sleep 10
+  done
+  echo "Scylla is now running on instance $i"
 done
-
-sleep 120
 
 CQL="DROP KEYSPACE IF EXISTS ycsb; CREATE KEYSPACE IF NOT EXISTS ycsb WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': '${CLUSTER_SIZE}'} AND DURABLE_WRITES = true; USE ycsb; DROP TABLE IF EXISTS usertable; CREATE TABLE usertable (
     y_id varchar primary key,
