@@ -31,8 +31,8 @@ done
 
 for ((i=0; i<$CLUSTER_SIZE; i++)); do
   echo "Configuring host on instance $i"
-  ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]} "nodetool status" | grep "UN"
-  while [[ $(ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]} "nodetool status" | grep "UN" | wc -l) -lt 1 ]]; do
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${PUBLIC_DNS_NAMES[$i]} "nodetool status" | grep "UN"
+  while [[ $(ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${PUBLIC_DNS_NAMES[$i]} "nodetool status" | grep "UN" | wc -l) -lt 1 ]]; do
     echo "Waiting for nodetool status to be active..."
     sleep 10
   done
