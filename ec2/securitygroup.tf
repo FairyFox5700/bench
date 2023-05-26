@@ -2,7 +2,7 @@
 
 resource "aws_security_group" "scylladbSecurityGroup" {
     description = "scyla db security group"
-    name = "scylla-db-security-group"
+    name        = var.security_group_name
     ingress {
         cidr_blocks = [
             "0.0.0.0/0"

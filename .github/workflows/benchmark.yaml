@@ -1,0 +1,191 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Benchmark
+env:
+    AWS_REGION: ${{ secrets.AWS_REGION }}
+permissions:
+      id-token: write 
+      contents: read 
+      pull-requests: write 
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  workflow_run:
+    workflows: ["Terraform action"]
+    types:
+      - completed
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+    
+jobs:
+  cassandra-setup:
+    runs-on: ubuntu-latest
+    env:
+      SCALLA_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_SCALLA }}
+      
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials from AWS account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: GitHub-OIDC-TERRAFORM
+
+      - name: Use scalla_key
+        run: |
+          echo "$SCALLA_PRIVATE_KEY" > scalla-key.pem
+          chmod 400 scalla-key.pem
+        working-directory: ./scripts/cassandra
+          
+      - name: Cassandra Setup
+        run: bash cassandra-setup.sh
+        working-directory: ./scripts/cassandra
+
+  scylla-setup:
+    env:
+      SCALLA_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_SCALLA }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials from AWS account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: GitHub-OIDC-TERRAFORM
+
+      - name: Use scalla_key
+        run: |
+          echo "$SCALLA_PRIVATE_KEY" > scalla-key.pem
+          chmod 400 scalla-key.pem
+        working-directory: ./scripts/scylla
+
+      - name: Scylla Setup
+        run: bash scylla-setup.sh
+        working-directory: ./scripts/scylla
+
+  ycsb-benchmark:
+    env:
+      SCALLA_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_SCALLA }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials from AWS account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: GitHub-OIDC-TERRAFORM
+
+      - name: Use scalla_key
+        run: |
+          echo "$SCALLA_PRIVATE_KEY" > scalla-key.pem
+          chmod 400 scalla-key.pem
+        working-directory: ./scripts
+        
+      - name: Loading and Runnning ycsb benchmark
+        run: |
+          PUBLIC_DNS_NAMES=($(aws ec2 describe-instances --filters "Name=tag:Name,Values=*client*" --query "Reservations[].Instances[].PublicDnsName" --output text))
+          scp -o StrictHostKeyChecking=no -i scalla-key.pem ycsb.sh ubuntu@${PUBLIC_DNS_NAMES[0]}:~/
+          INSTANCE_PUBLIC_IP_ADDRESSES_STRING_SCYLLA=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=*scylla*" --query "Reservations[].Instances[].PublicIpAddress" --output text | sed 's/\t/,/g'  )
+          ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${PUBLIC_DNS_NAMES[0]} << 'EOF'
+          bash -s < ./ycsb.sh -a "$INSTANCE_PUBLIC_IP_ADDRESSES_STRING_SCYLLA" -c "4000"
+          EOF
+          
+        working-directory: ./scripts
+    needs: [cassandra-setup, scylla-setup]
+    
+
+  move-to-s3:
+    needs: ycsb-benchmark
+    env:
+      SCALLA_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_SCALLA }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials from AWS account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: GitHub-OIDC-TERRAFORM
+
+      - name: Use scalla_key
+        run: |
+          echo "$SCALLA_PRIVATE_KEY" > scalla-key.pem
+          chmod 400 scalla-key.pem
+        working-directory: ./scripts
+        
+
+      - name: Transfering results to s3 bucket
+        run: | 
+          PUBLIC_DNS_NAMES=($(aws ec2 describe-instances --filters "Name=tag:Name,Values=*client*" --query "Reservations[].Instances[].PublicDnsName" --output text))
+          scp -o StrictHostKeyChecking=no -i scalla-key.pem copy-to-s3.sh ubuntu@${PUBLIC_DNS_NAMES[0]}:~/
+          ssh -o StrictHostKeyChecking=no -i scalla-key.pem ubuntu@${PUBLIC_DNS_NAMES[0]} << 'EOF'
+          bash -s < ./copy-to-s3.sh
+          EOF
+        working-directory: ./scripts
+   
+
+  clean-up-scylla:
+    needs: move-to-s3
+    env:
+        SCALLA_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_SCALLA }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials from AWS account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: GitHub-OIDC-TERRAFORM
+
+      - name: Use scalla_key
+        run: |
+          echo "$SCALLA_PRIVATE_KEY" > scalla-key.pem
+          chmod 400 scalla-key.pem
+        working-directory: ./scripts/scylla
+
+      - name: cleaning systems before the next run
+        run: bash cleanup.sh
+        working-directory: ./scripts/scylla
+
+  clean-up-cassandra:
+    env:
+      SCALLA_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_SCALLA }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials from AWS account
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: GitHub-OIDC-TERRAFORM
+
+      - name: Use scalla_key
+        run: |
+          echo "$SCALLA_PRIVATE_KEY" > scalla-key.pem
+          chmod 400 scalla-key.pem
+        working-directory: ./scripts/cassandra
+
+      - name: cleaning systems before the next run
+        run: bash cleanup.sh
+        working-directory: ./scripts/cassandra
+    needs: move-to-s3
