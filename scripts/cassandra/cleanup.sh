@@ -29,6 +29,15 @@ for ((i=0; i<$CLUSTER_SIZE; i++)); do
   echo "Cassandra is now running on instance $i"
 done
 
+for ((i=0; i<$CLUSTER_SIZE; i++)); do
+  echo "Configuring host on instance $i"
+  ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]} "nodetool status" | grep "UN"
+  while [[ $(ssh -o StrictHostKeyChecking=no -i scalla-key.pem scyllaadm@${PUBLIC_DNS_NAMES[$i]} "nodetool status" | grep "UN" | wc -l) -lt 1 ]]; do
+    echo "Waiting for nodetool status to be active..."
+    sleep 10
+  done
+  echo "nodetool status is active on instance $i"
+done
 
 CQL="DROP KEYSPACE IF EXISTS ycsb; CREATE KEYSPACE IF NOT EXISTS ycsb WITH REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': '${CLUSTER_SIZE}'} AND DURABLE_WRITES = true; USE ycsb; DROP TABLE IF EXISTS usertable; CREATE TABLE usertable (
     y_id varchar primary key,
